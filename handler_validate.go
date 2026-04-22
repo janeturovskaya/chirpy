@@ -2,7 +2,9 @@ package main
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
+	"strings"
 )
 
 func handlerChirpsValidate(w http.ResponseWriter, r *http.Request) {
@@ -31,4 +33,24 @@ func handlerChirpsValidate(w http.ResponseWriter, r *http.Request) {
 	respondWithJSON(w, http.StatusOK, responseBody{
 		Valid: true,
 	})
+}
+
+func clearProfineWords(post string) (string, error) {
+	var b strings.Builder
+	profaneWords := [3]string{"kerfuffle", "sharbert", "fornax"}
+	splitted := strings.Split(post, " ")
+	for i, w := range splitted {
+		lowered := strings.ToLower(w)
+		if lowered == profaneWords[0] || lowered == profaneWords[1] || lowered == profaneWords[2] {
+			splitted[i] = "****"
+		}
+		_, err := b.WriteString(splitted[i] + " ")
+		if err != nil {
+			log.Printf("Error writing string: %v", err)
+			return "", err
+		}
+	}
+	res := b.String()
+	res = strings.TrimSpace(res)
+	return res, nil
 }
